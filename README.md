@@ -84,3 +84,24 @@ package.json：
     "postbuild": "rimraf dist/mockServiceWorker.js",
   },
 ```
+
+## 后续补充
+
+在实际使用 MSW 的过程中，发现了一些问题并补充如下：
+
+1. **Vite 项目启用 HTTPS 后，WebSocket 需要调整为 WSS**  
+   • 将 `ws` 替换为 `wss` 后，仍可能因浏览器安全策略导致连接失败。此时需在浏览器中手动访问对应的 WSS 网址并授权。
+
+2. **Vite 与 MSW 的兼容性问题**  
+   • Vite 的资源按需加载机制会导致每个资源请求都被 MSW 拦截，虽然不影响实际效果，但所有资源请求都会出现在 Network 的 XHR 栏中，影响调试体验。  
+   • 尝试通过设置 `serviceWorker.options.scope` 来限制拦截范围，但直接导致页面无限刷新，项目无法正常运行。  
+     ```js
+     serviceWorker: {
+       options: {
+         scope: '/接口前缀', // 此设置会导致页面无限刷新，不可使用！
+       },
+     },
+     ```
+   • 相关讨论见：[Chrome reloads infinitely when serviceWorker.options.scope is set](https://github.com/mswjs/msw/issues/1627)。
+
+  
